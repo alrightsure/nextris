@@ -12,6 +12,18 @@ module.exports = {
         extend: {
             gridTemplateRows: {
                 10: "repeat(10, minmax(0, 1fr))"
+            },
+            aspectRatio: {
+                "1/2": "1 / 2"
+            },
+            colors: {
+                hero: "#00F0F0",
+                "blue-ricky": "#0000F0",
+                "orange-ricky": "#F0A000",
+                "smash-boy": "#F0F000",
+                "cleveland-z": "#F00000",
+                "rhode-island-z": "#00F000",
+                teewee: "#A000F0"
             }
         }
     },

@@ -5,111 +5,198 @@ import { useCallback, useEffect, useState } from "react";
 import { useKeyPressEvent } from "react-use";
 import { useTimer } from "use-timer";
 
-interface Tetrimino {
-    cells: [{ x: number; y: number }];
+interface Cell {
+    x: number;
+    y: number;
     className: string;
 }
 
-const getNextPiece = () => {
-    const getLShape = () => [
-        [1, 0],
-        [1, 1],
-        [1, 2],
-        [2, 2]
-    ];
+const getNextPiece = (): Cell[] => {
+    const isHorizontal = Math.random() > 0.5;
 
-    const getSquareShape = () => [
-        [1, 0],
-        [1, 1],
-        [2, 0],
-        [2, 1]
-    ];
+    const getBlueRicky = () => {
+        const className = "bg-blue-ricky";
 
-    const getStraightShape = () => {
-        const isHorizontal = Math.random() > 0.5;
         if (isHorizontal) {
             return [
-                [1, 0],
-                [1, 1],
-                [1, 2],
-                [1, 3]
-            ];
-        } else {
-            return [
-                [1, 0],
-                [2, 0],
-                [3, 0],
-                [4, 0]
+                { x: 0, y: 0, className },
+                { x: 1, y: 0, className },
+                { x: 2, y: 0, className },
+                { x: 2, y: 1, className }
             ];
         }
+
+        return [
+            { x: 1, y: 0, className },
+            { x: 1, y: 1, className },
+            { x: 1, y: 2, className },
+            { x: 0, y: 2, className }
+        ];
     };
 
-    const getSkewShape = () => {
-        const isHorizontal = Math.random() > 0.5;
+    const getOrangeRicky = () => {
+        const className = "bg-orange-ricky";
         if (isHorizontal) {
             return [
-                [1, 0],
-                [1, 1],
-                [2, 1],
-                [2, 2]
-            ];
-        } else {
-            return [
-                [1, 0],
-                [2, 0],
-                [2, 1],
-                [3, 1]
+                { x: 0, y: 1, className },
+                { x: 1, y: 1, className },
+                { x: 2, y: 1, className },
+                { x: 2, y: 0, className }
             ];
         }
+
+        return [
+            { x: 1, y: 0, className },
+            { x: 1, y: 1, className },
+            { x: 1, y: 2, className },
+            { x: 2, y: 2, className }
+        ];
     };
 
-    const pieceChoice = Math.floor(Math.random() * 4);
+    const getHero = () => {
+        const className = "bg-hero";
+
+        if (isHorizontal) {
+            return [
+                { x: 1, y: 0, className },
+                { x: 1, y: 1, className },
+                { x: 1, y: 2, className },
+                { x: 1, y: 3, className }
+            ];
+        }
+
+        return [
+            { x: 0, y: 1, className },
+            { x: 1, y: 1, className },
+            { x: 2, y: 1, className },
+            { x: 3, y: 1, className }
+        ];
+    };
+
+    const getSmashBoy = () => {
+        const className = "bg-smash-boy";
+        return [
+            { x: 0, y: 0, className },
+            { x: 1, y: 0, className },
+            { x: 1, y: 1, className },
+            { x: 0, y: 1, className }
+        ];
+    };
+
+    const getClevelandZ = () => {
+        const className = "bg-cleveland-z";
+        if (isHorizontal) {
+            return [
+                { x: 0, y: 0, className },
+                { x: 1, y: 0, className },
+                { x: 1, y: 1, className },
+                { x: 2, y: 1, className }
+            ];
+        }
+
+        return [
+            { x: 1, y: 0, className },
+            { x: 1, y: 1, className },
+            { x: 0, y: 1, className },
+            { x: 0, y: 2, className }
+        ];
+    };
+
+    const getRhodeIslandZ = () => {
+        const className = "bg-rhode-island-z";
+        if (isHorizontal) {
+            return [
+                { x: 0, y: 1, className },
+                { x: 1, y: 1, className },
+                { x: 1, y: 0, className },
+                { x: 2, y: 0, className }
+            ];
+        }
+
+        return [
+            { x: 0, y: 0, className },
+            { x: 0, y: 1, className },
+            { x: 1, y: 1, className },
+            { x: 1, y: 2, className }
+        ];
+    };
+
+    const getTeeWee = () => {
+        const className = "bg-teewee";
+        if (isHorizontal) {
+            return [
+                { x: 0, y: 0, className },
+                { x: 1, y: 0, className },
+                { x: 2, y: 0, className },
+                { x: 1, y: 1, className }
+            ];
+        }
+
+        return [
+            { x: 1, y: 0, className },
+            { x: 1, y: 1, className },
+            { x: 1, y: 2, className },
+            { x: 0, y: 1, className }
+        ];
+    };
+
+    const pieceChoice = Math.floor(Math.random() * 7);
     switch (pieceChoice) {
         case 0:
-            return getLShape();
+            return getBlueRicky();
         case 1:
-            return getSquareShape();
+            return getOrangeRicky();
         case 2:
-            return getStraightShape();
+            return getHero();
         case 3:
-            return getSkewShape();
+            return getSmashBoy();
+        case 4:
+            return getClevelandZ();
+        case 5:
+            return getRhodeIslandZ();
+        case 6:
+            return getTeeWee();
         default:
-            return getLShape();
+            return getHero();
     }
 };
 
 export const Board = () => {
-    const [currentPiece, setCurrentPiece] = useState<number[][]>([]);
-    const [occupiedSpaces, setOccupiedSpaces] = useState<number[][]>([
-        [9, 19],
-        [8, 19],
-        [7, 19],
-        [6, 19],
-        [5, 19],
-        [4, 19],
-        [3, 19],
-        [2, 19]
-    ]);
+    const [currentPiece, setCurrentPiece] = useState<Cell[]>([]);
+    const [occupiedCells, setOccupiedCells] = useState<Cell[]>([]);
 
     const canMoveRight = () => {
-        return !currentPiece.some(([x, y]) => x === 9 || y === 19 || occupiedSpaces.some(([x2, y2]) => x2 === x + 1 && y2 === y));
+        return !currentPiece.some(
+            currentCell =>
+                currentCell.x === 9 ||
+                currentCell.y === 19 ||
+                occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x + 1 && occupiedCell.y === currentCell.y)
+        );
     };
 
     const canMoveLeft = () => {
-        return !currentPiece.some(([x, y]) => x === 0 || y === 19 || occupiedSpaces.some(([x2, y2]) => x2 === x - 1 && y2 === y));
+        return !currentPiece.some(
+            currentCell =>
+                currentCell.x === 0 ||
+                currentCell.y === 19 ||
+                occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x - 1 && occupiedCell.y === currentCell.y)
+        );
     };
 
     const canMoveDown = useCallback(() => {
-        return !currentPiece.some(([x, y]) => y === 19 || occupiedSpaces.some(([x2, y2]) => x === x2 && y + 1 === y2));
-    }, [currentPiece, occupiedSpaces]);
+        return !currentPiece.some(
+            currentCell =>
+                currentCell.y === 19 || occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x && currentCell.y + 1 === occupiedCell.y)
+        );
+    }, [currentPiece, occupiedCells]);
 
     useTimer({
         autostart: true,
         onTimeUpdate: () => {
-            if (currentPiece.some(([x, y]) => y === 19)) {
+            if (currentPiece.some(cell => cell.y === 19)) {
                 return;
             }
-            setCurrentPiece(currentPiece.map(([x, y]) => [x, y + 1]));
+            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x, y: cell.y + 1, className: cell.className })));
         }
     });
 
@@ -119,39 +206,39 @@ export const Board = () => {
 
     useEffect(() => {
         if (!canMoveDown()) {
-            setOccupiedSpaces([...occupiedSpaces, ...currentPiece]);
+            setOccupiedCells([...occupiedCells, ...currentPiece]);
             setCurrentPiece(getNextPiece());
         }
-    }, [canMoveDown, currentPiece, occupiedSpaces]);
+    }, [canMoveDown, currentPiece, occupiedCells]);
 
     useEffect(() => {
         const deleteRow = (rowIndex: number) => {
-            const newOccupiedSpaces: number[][] = [];
+            const newOccupiedSpaces: Cell[] = [];
 
-            occupiedSpaces.forEach(space => {
-                if (space[1] === rowIndex) {
+            occupiedCells.forEach(cell => {
+                if (cell.y === rowIndex) {
                     return;
                 }
 
-                if (space[1] > rowIndex) {
-                    newOccupiedSpaces.push(space);
+                if (cell.y > rowIndex) {
+                    newOccupiedSpaces.push(cell);
                     return;
                 }
 
-                newOccupiedSpaces.push([space[0], space[1] + 1]);
+                newOccupiedSpaces.push({ x: cell.x, y: cell.y + 1, className: cell.className });
             });
 
-            setOccupiedSpaces(newOccupiedSpaces);
+            setOccupiedCells(newOccupiedSpaces);
         };
 
-        if (occupiedSpaces.some(([_, y]) => y === 0)) {
+        if (occupiedCells.some(cell => cell.y === 0)) {
             alert("Game Over!");
-            setOccupiedSpaces([]);
+            setOccupiedCells([]);
         }
 
         const rows = [...Array(20)].map((_, yIndex) => {
             return [...Array(10)].map((_, xIndex) => {
-                return occupiedSpaces.some(([x, y]) => x === xIndex && y === yIndex);
+                return occupiedCells.some(cell => cell.x === xIndex && cell.y === yIndex);
             });
         });
 
@@ -160,48 +247,63 @@ export const Board = () => {
                 deleteRow(rowIndex);
             }
         });
-    }, [occupiedSpaces]);
+    }, [occupiedCells]);
 
     useKeyPressEvent("ArrowLeft", () => {
         if (canMoveLeft()) {
-            setCurrentPiece(currentPiece.map(([x, y]) => [x - 1, y]));
+            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x - 1, y: cell.y, className: cell.className })));
         }
     });
 
     useKeyPressEvent("ArrowRight", () => {
         if (canMoveRight()) {
-            setCurrentPiece(currentPiece.map(([x, y]) => [x + 1, y]));
+            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x + 1, y: cell.y, className: cell.className })));
         }
     });
 
     useKeyPressEvent("ArrowDown", () => {
         if (canMoveDown()) {
-            setCurrentPiece(currentPiece.map(([x, y]) => [x, y + 1]));
+            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x, y: cell.y + 1, className: cell.className })));
         }
     });
 
     useKeyPressEvent("ArrowUp", () => {
-        const rotatedPiece = currentPiece.map(([x, y]) => {
-            const xDiff = x - currentPiece[0][0];
-            const yDiff = y - currentPiece[0][1];
-            return [currentPiece[0][0] - yDiff, currentPiece[0][1] + xDiff];
+        const rotatedPiece: Cell[] = currentPiece.map(cell => {
+            const xDiff = cell.x - currentPiece[0].x;
+            const yDiff = cell.y - currentPiece[0].y;
+            return { x: currentPiece[0].x - yDiff, y: currentPiece[0].y + xDiff, className: cell.className };
         });
-        if (rotatedPiece.some(([x, y]) => x < 0 || x > 9 || y < 0 || y > 19 || occupiedSpaces.some(([x2, y2]) => x === x2 && y === y2))) {
+        if (
+            rotatedPiece.some(
+                currentCell =>
+                    currentCell.x < 0 ||
+                    currentCell.x > 9 ||
+                    currentCell.y < 0 ||
+                    currentCell.y > 19 ||
+                    occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x && currentCell.y === occupiedCell.y)
+            )
+        ) {
             return;
         }
         setCurrentPiece(rotatedPiece);
     });
 
-    const shouldFillCell = ({ xIndex, yIndex }: { xIndex: number; yIndex: number }) => {
-        return occupiedSpaces.some(([x, y]) => x === xIndex && y === yIndex) || currentPiece.some(([x, y]) => x === xIndex && y === yIndex);
+    const getCellFill = ({ xIndex, yIndex }: { xIndex: number; yIndex: number }) => {
+        for (const cell of [...currentPiece, ...occupiedCells]) {
+            if (cell.x === xIndex && cell.y === yIndex) {
+                return cell.className;
+            }
+        }
+
+        return "bg-white";
     };
 
     return (
-        <div className="grid grid-cols-10 h-2/3 w-1/2 border-4 border-black">
+        <div className="grid grid-cols-10 h-3/4 aspect-1/2 border-4 border-black">
             {[...Array(10)].map((_, xIndex) => (
                 <div className="border-2 flex flex-col" key={xIndex}>
                     {[...Array(20)].map((_, yIndex) => (
-                        <div key={yIndex} className={cn("border-2 flex-grow", shouldFillCell({ xIndex, yIndex }) ? "bg-slate-700" : "bg-white")} />
+                        <div key={yIndex} className={cn("border-2 flex-grow", getCellFill({ xIndex, yIndex }))} />
                     ))}
                 </div>
             ))}
