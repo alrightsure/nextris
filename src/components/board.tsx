@@ -231,11 +231,20 @@ export const Board = () => {
         };
 
         const rotate = () => {
-            const rotatedPiece: Cell[] = currentPiece.map(cell => {
-                const xDiff = cell.x - currentPiece[0].x;
-                const yDiff = cell.y - currentPiece[0].y;
-                return { x: currentPiece[0].x - yDiff, y: currentPiece[0].y + xDiff, className: cell.className };
-            });
+            const newX1 = currentPiece[0].y - currentPiece[1].y + currentPiece[1].x;
+            const newY1 = currentPiece[1].x - currentPiece[0].x + currentPiece[1].y;
+            const newX3 = currentPiece[2].y - currentPiece[1].y + currentPiece[1].x;
+            const newY3 = currentPiece[1].x - currentPiece[2].x + currentPiece[1].y;
+            const newX4 = currentPiece[3].y - currentPiece[1].y + currentPiece[1].x;
+            const newY4 = currentPiece[1].x - currentPiece[3].x + currentPiece[1].y;
+
+            const rotatedPiece = [
+                { x: newX1, y: newY1, className: currentPiece[0].className },
+                { x: currentPiece[1].x, y: currentPiece[1].y, className: currentPiece[1].className },
+                { x: newX3, y: newY3, className: currentPiece[2].className },
+                { x: newX4, y: newY4, className: currentPiece[3].className }
+            ];
+
             if (
                 rotatedPiece.some(
                     currentCell =>
@@ -248,6 +257,7 @@ export const Board = () => {
             ) {
                 return;
             }
+
             setCurrentPiece(rotatedPiece);
         };
 
