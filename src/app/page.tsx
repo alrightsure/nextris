@@ -1,4 +1,5 @@
-import { Board } from "./board";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Board } from "@/components/board";
 
 const Home = () => {
     return (

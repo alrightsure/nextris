@@ -2,8 +2,8 @@
 
 import { cn } from "@/utils/cn";
 import { useCallback, useEffect, useState } from "react";
-import { useKeyPressEvent } from "react-use";
 import { useTimer } from "use-timer";
+import { ScoreCard } from "./scoreCard";
 
 interface Cell {
     x: number;
@@ -164,24 +164,25 @@ const getNextPiece = (): Cell[] => {
 export const Board = () => {
     const [currentPiece, setCurrentPiece] = useState<Cell[]>([]);
     const [occupiedCells, setOccupiedCells] = useState<Cell[]>([]);
+    const [currentScore, setCurrentScore] = useState(0);
 
-    const canMoveRight = () => {
+    const canMoveRight = useCallback(() => {
         return !currentPiece.some(
             currentCell =>
                 currentCell.x === 9 ||
                 currentCell.y === 19 ||
                 occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x + 1 && occupiedCell.y === currentCell.y)
         );
-    };
+    }, [currentPiece, occupiedCells]);
 
-    const canMoveLeft = () => {
+    const canMoveLeft = useCallback(() => {
         return !currentPiece.some(
             currentCell =>
                 currentCell.x === 0 ||
                 currentCell.y === 19 ||
                 occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x - 1 && occupiedCell.y === currentCell.y)
         );
-    };
+    }, [currentPiece, occupiedCells]);
 
     const canMoveDown = useCallback(() => {
         return !currentPiece.some(
@@ -203,6 +204,58 @@ export const Board = () => {
     useEffect(() => {
         setCurrentPiece(getNextPiece());
     }, []);
+
+    useEffect(() => {
+        const keyDownHandler = (event: KeyboardEvent) => {
+            switch (event.key) {
+                case "ArrowLeft":
+                    if (canMoveLeft()) {
+                        setCurrentPiece(currentPiece.map(cell => ({ x: cell.x - 1, y: cell.y, className: cell.className })));
+                    }
+                    break;
+                case "ArrowRight":
+                    if (canMoveRight()) {
+                        setCurrentPiece(currentPiece.map(cell => ({ x: cell.x + 1, y: cell.y, className: cell.className })));
+                    }
+                    break;
+                case "ArrowDown":
+                    if (canMoveDown()) {
+                        setCurrentScore(currentScore + 1);
+                        setCurrentPiece(currentPiece.map(cell => ({ x: cell.x, y: cell.y + 1, className: cell.className })));
+                    }
+                    break;
+                case "ArrowUp":
+                    rotate();
+                    break;
+            }
+        };
+
+        const rotate = () => {
+            const rotatedPiece: Cell[] = currentPiece.map(cell => {
+                const xDiff = cell.x - currentPiece[0].x;
+                const yDiff = cell.y - currentPiece[0].y;
+                return { x: currentPiece[0].x - yDiff, y: currentPiece[0].y + xDiff, className: cell.className };
+            });
+            if (
+                rotatedPiece.some(
+                    currentCell =>
+                        currentCell.x < 0 ||
+                        currentCell.x > 9 ||
+                        currentCell.y < 0 ||
+                        currentCell.y > 19 ||
+                        occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x && currentCell.y === occupiedCell.y)
+                )
+            ) {
+                return;
+            }
+            setCurrentPiece(rotatedPiece);
+        };
+
+        window.addEventListener("keydown", keyDownHandler);
+        return () => {
+            window.removeEventListener("keydown", keyDownHandler);
+        };
+    }, [canMoveDown, canMoveLeft, canMoveRight, currentPiece, currentScore, occupiedCells]);
 
     useEffect(() => {
         if (!canMoveDown()) {
@@ -229,11 +282,17 @@ export const Board = () => {
             });
 
             setOccupiedCells(newOccupiedSpaces);
+            setCurrentScore(currentScore + 100);
+        };
+
+        const gameOver = () => {
+            alert("Game Over!");
+            setOccupiedCells([]);
+            setCurrentScore(0);
         };
 
         if (occupiedCells.some(cell => cell.y === 0)) {
-            alert("Game Over!");
-            setOccupiedCells([]);
+            gameOver();
         }
 
         const rows = [...Array(20)].map((_, yIndex) => {
@@ -247,46 +306,7 @@ export const Board = () => {
                 deleteRow(rowIndex);
             }
         });
-    }, [occupiedCells]);
-
-    useKeyPressEvent("ArrowLeft", () => {
-        if (canMoveLeft()) {
-            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x - 1, y: cell.y, className: cell.className })));
-        }
-    });
-
-    useKeyPressEvent("ArrowRight", () => {
-        if (canMoveRight()) {
-            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x + 1, y: cell.y, className: cell.className })));
-        }
-    });
-
-    useKeyPressEvent("ArrowDown", () => {
-        if (canMoveDown()) {
-            setCurrentPiece(currentPiece.map(cell => ({ x: cell.x, y: cell.y + 1, className: cell.className })));
-        }
-    });
-
-    useKeyPressEvent("ArrowUp", () => {
-        const rotatedPiece: Cell[] = currentPiece.map(cell => {
-            const xDiff = cell.x - currentPiece[0].x;
-            const yDiff = cell.y - currentPiece[0].y;
-            return { x: currentPiece[0].x - yDiff, y: currentPiece[0].y + xDiff, className: cell.className };
-        });
-        if (
-            rotatedPiece.some(
-                currentCell =>
-                    currentCell.x < 0 ||
-                    currentCell.x > 9 ||
-                    currentCell.y < 0 ||
-                    currentCell.y > 19 ||
-                    occupiedCells.some(occupiedCell => occupiedCell.x === currentCell.x && currentCell.y === occupiedCell.y)
-            )
-        ) {
-            return;
-        }
-        setCurrentPiece(rotatedPiece);
-    });
+    }, [currentScore, occupiedCells]);
 
     const getCellFill = ({ xIndex, yIndex }: { xIndex: number; yIndex: number }) => {
         for (const cell of [...currentPiece, ...occupiedCells]) {
@@ -299,14 +319,17 @@ export const Board = () => {
     };
 
     return (
-        <div className="grid grid-cols-10 h-3/4 aspect-1/2 border-4 border-black">
-            {[...Array(10)].map((_, xIndex) => (
-                <div className="border-2 flex flex-col" key={xIndex}>
-                    {[...Array(20)].map((_, yIndex) => (
-                        <div key={yIndex} className={cn("border-2 flex-grow", getCellFill({ xIndex, yIndex }))} />
-                    ))}
-                </div>
-            ))}
-        </div>
+        <>
+            <ScoreCard score={currentScore} />
+            <div className="grid grid-cols-10 h-3/4 aspect-1/2 border-4 border-black">
+                {[...Array(10)].map((_, xIndex) => (
+                    <div className="border-2 flex flex-col" key={xIndex}>
+                        {[...Array(20)].map((_, yIndex) => (
+                            <div key={yIndex} className={cn("border-2 flex-grow", getCellFill({ xIndex, yIndex }))} />
+                        ))}
+                    </div>
+                ))}
+            </div>
+        </>
     );
 };
