@@ -8,6 +8,8 @@ import { GameOver } from "@/components/gameOver";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+export const runtime = 'experimental-edge';
+
 interface Cell {
     x: number;
     y: number;
