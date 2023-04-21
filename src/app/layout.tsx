@@ -2,8 +2,6 @@ import { H1 } from "@/components/ui/h1";
 import Link from "next/link";
 import "./globals.css";
 
-export const runtime = 'experimental-edge';
-
 export const metadata = {
     title: "Nextris",
     description: "Tetris powered by Next.js"
