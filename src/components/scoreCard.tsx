@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardHeader, CardTitle } from "./ui/card";
 
 interface ScoreCardProps {
