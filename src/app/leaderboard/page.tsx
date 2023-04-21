@@ -3,8 +3,6 @@ import { db } from "@/utils/db";
 import { topScores } from "@/utils/db/schema";
 import { desc } from "drizzle-orm/expressions";
 
-export const runtime = 'experimental-edge';
-
 const HighScores = async () => {
     const scores = await db.select().from(topScores).orderBy(desc(topScores.score)).limit(100);
 
